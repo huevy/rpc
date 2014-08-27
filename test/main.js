@@ -7,7 +7,7 @@ var codec = require('../lib/codec');
 describe('encoder', function () {
     it('should encode plain text', function () {
         var enc = new codec.Encoder();
-        var privateKey = fs.readFileSync(process.env.HOME + '/.ssh/id_rsa', 'ascii');
+        var privateKey = fs.readFileSync(__dirname + '/fixtures/id_rsa', 'ascii');
         var signed = enc.encode('HELLO_world', 'user1', privateKey);
         signed.should.endWith('.SEVMTE9fd29ybGQ=');
         signed.should.startWith('dXNlcjE=.');
@@ -15,7 +15,7 @@ describe('encoder', function () {
 
     it('should encode json', function () {
         var enc = new codec.Encoder();
-        var privateKey = fs.readFileSync(process.env.HOME + '/.ssh/id_rsa', 'ascii');
+        var privateKey = fs.readFileSync(__dirname + '/fixtures/id_rsa', 'ascii');
         var signed = enc.encodeJSON({text: 'HELLO_world'}, 'user1', privateKey);
         signed.should.endWith('.eyJ0ZXh0IjoiSEVMTE9fd29ybGQifQ==');
         signed.should.startWith('dXNlcjE=.');
@@ -26,8 +26,8 @@ describe('decoder', function () {
     it('should decode plain text', function (done) {
         var enc = new codec.Encoder();
 
-        var privateKey = fs.readFileSync(process.env.HOME + '/.ssh/id_rsa', 'ascii');
-        var publicKey = fs.readFileSync(process.env.HOME + '/.ssh/id_rsa.pub', 'ascii');
+        var privateKey = fs.readFileSync(__dirname + '/fixtures/id_rsa', 'ascii');
+        var publicKey = fs.readFileSync(__dirname + '/fixtures/id_rsa.pub', 'ascii');
         var keyStore = {
             user1: publicKey
         };
