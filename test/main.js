@@ -4,8 +4,8 @@ var fs = require('fs');
 
 var codec = require('../lib/codec');
 
-describe('encoder', function () {
-    it('should encode plain text', function () {
+describe('encoder', function() {
+    it('should encode plain text', function() {
         var enc = new codec.Encoder();
         var privateKey = fs.readFileSync(__dirname + '/fixtures/id_rsa', 'ascii');
         var signed = enc.encode('HELLO_world', 'user1', privateKey);
@@ -13,17 +13,19 @@ describe('encoder', function () {
         signed.should.startWith('dXNlcjE=.');
     });
 
-    it('should encode json', function () {
+    it('should encode json', function() {
         var enc = new codec.Encoder();
         var privateKey = fs.readFileSync(__dirname + '/fixtures/id_rsa', 'ascii');
-        var signed = enc.encodeJSON({text: 'HELLO_world'}, 'user1', privateKey);
+        var signed = enc.encodeJSON({
+            text: 'HELLO_world'
+        }, 'user1', privateKey);
         signed.should.endWith('.eyJ0ZXh0IjoiSEVMTE9fd29ybGQifQ==');
         signed.should.startWith('dXNlcjE=.');
     });
 });
 
-describe('decoder', function () {
-    it('should decode plain text', function (done) {
+describe('decoder', function() {
+    it('should decode plain text', function(done) {
         var enc = new codec.Encoder();
 
         var privateKey = fs.readFileSync(__dirname + '/fixtures/id_rsa', 'ascii');
@@ -33,7 +35,7 @@ describe('decoder', function () {
         };
 
         var dec = new codec.Decoder({
-            keyResolver: function (userId) {
+            keyResolver: function(userId) {
                 return keyStore[userId];
             }
         });
@@ -41,11 +43,39 @@ describe('decoder', function () {
 
         var signed = enc.encode('HELLO_world', 'user1', privateKey);
         dec.decode(signed)
-            .then(function (res) {
+            .then(function(res) {
                 res.userId.should.equal('user1');
                 res.data.should.equal('HELLO_world');
                 done();
-            }, function () {
+            }, function() {
+                done();
+            }).done();
+    });
+    it('should decode JSON', function(done) {
+        var enc = new codec.Encoder();
+
+        var privateKey = fs.readFileSync(__dirname + '/fixtures/id_rsa', 'ascii');
+        var publicKey = fs.readFileSync(__dirname + '/fixtures/id_rsa.pub', 'ascii');
+        var keyStore = {
+            user1: publicKey
+        };
+
+        var dec = new codec.Decoder({
+            keyResolver: function(userId) {
+                return keyStore[userId];
+            }
+        });
+
+
+        var signed = enc.encodeJSON({
+            'hello': 'world'
+        }, 'user1', privateKey);
+        dec.decodeJSON(signed)
+            .then(function(res) {
+                res.userId.should.equal('user1');
+                res.data.hello.should.equal('world');
+                done();
+            }, function() {
                 done();
             }).done();
     });
